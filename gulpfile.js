@@ -58,18 +58,35 @@ function webpackTask(cb, opts) {
     });
 }
 
-gulp.task('clean', cb => del(['dist'], cb));
+gulp.task('clean', cb => del.sync(['dist'], cb));
 
-gulp.task('static', ['clean'], () => {
+gulp.task('static', () => {
     return gulp.src([
         'src/*/*.css',
         'src/*.html'
-    ]).pipe(gulp.dest('dist'));
+    ], {
+        dot: true
+    }).pipe(gulp.dest('dist'));
+});
+
+gulp.task('assets', () => {
+    return gulp.src([
+        'src/assets/**/*'
+    ], {
+        dot: true
+    }).pipe(gulp.dest('dist/assets'));
+});
+
+gulp.task('libs', () => {
+    gulp.src('node_modules/three/build/three.min.js')
+        .pipe(gulp.dest('dist/libs'));
+    gulp.src('src/libs/*')
+        .pipe(gulp.dest('dist/libs'));
 });
 
 gulp.task('webpack:prod', cb => webpackTask(cb, {prod: true}));
 
-gulp.task('build', ['static', 'webpack:prod']);
+gulp.task('build', ['clean', 'libs', 'static', 'assets', 'webpack:prod']);
 
 gulp.task('watch', cb => webpackTask(cb, {watch: true}));
 
